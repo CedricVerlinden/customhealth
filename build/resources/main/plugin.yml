@@ -1,8 +1,0 @@
-name: customheath
-version: '1.0-SNAPSHOT'
-main: com.cedricverlinden.customheath.CustomHeath
-api-version: 1.19
-author: 'Cédric'
-
-commands:
-  item:
