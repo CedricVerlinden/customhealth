@@ -1,0 +1,8 @@
+name: customheath
+version: '${version}'
+main: com.cedricverlinden.customheath.CustomHeath
+api-version: 1.19
+author: 'Cédric'
+
+commands:
+  item:
