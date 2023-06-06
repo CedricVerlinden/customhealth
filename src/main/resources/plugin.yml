@@ -1,6 +1,6 @@
-name: customheath
+name: CustomHealth
 version: '${version}'
-main: com.cedricverlinden.customheath.CustomHeath
+main: com.cedricverlinden.customhealth.CustomHealth
 api-version: 1.19
 author: 'Cédric'
 

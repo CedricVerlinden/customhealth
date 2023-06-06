@@ -1,8 +1,9 @@
-package com.cedricverlinden.customheath.items;
+package com.cedricverlinden.customhealth.constants;
 
 import org.bukkit.ChatColor;
 
 public enum Rarity {
+
 	COMMON(ChatColor.WHITE),
 	UNCOMMON(ChatColor.GREEN),
 	RARE(ChatColor.BLUE),

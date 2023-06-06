@@ -1,4 +1,4 @@
-package com.cedricverlinden.customheath.utils;
+package com.cedricverlinden.customhealth.utils;
 
 import org.bukkit.ChatColor;
 
