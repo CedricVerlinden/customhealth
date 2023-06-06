@@ -2,19 +2,26 @@ package com.cedricverlinden.customhealth.managers;
 
 import com.cedricverlinden.customhealth.CustomHealth;
 import com.cedricverlinden.customhealth.constants.Rarity;
-import com.cedricverlinden.customhealth.utils.Color;
+import com.cedricverlinden.customhealth.utils.Chat;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class ItemManager {
+
+	private static Map<UUID, ItemManager> itemData = new HashMap<>();
 
 	final Material material;
 	final String displayName;
@@ -24,15 +31,12 @@ public class ItemManager {
 	final String ability;
 	final int mana;
 
-	public static NamespacedKey key;
-	public static UUID uuid;
+	private static UUID uuid;
 	private final ItemStack itemStack;
+	private final File file;
+	private final YamlConfiguration configuration;
 
-	/*public ItemManager(UUID uuid) {
-
-	}*/
-
-	public ItemManager(Material material, String displayName, Rarity rarity, int damage, String ability, int mana) {
+	protected ItemManager(Material material, String displayName, Rarity rarity, int damage, String ability, int mana) {
 		this.material = material;
 		this.displayName = displayName;
 
@@ -40,9 +44,10 @@ public class ItemManager {
 		this.damage = damage;
 		this.ability = ability;
 		this.mana = mana;
+		this.configuration = new YamlConfiguration();
 
 		uuid = UUID.randomUUID();
-		key = new NamespacedKey(CustomHealth.getInstance(), "CustomItem");
+		NamespacedKey key = new NamespacedKey(CustomHealth.getInstance(), "CustomItem");
 
 		itemStack = new ItemStack(material);
 		ItemMeta itemMeta = itemStack.getItemMeta();
@@ -55,17 +60,57 @@ public class ItemManager {
 		itemMeta.displayName(Component.text(rarity.getColor() + displayName));
 
 		ArrayList<String> lore = new ArrayList<>();
-		lore.add(Color.color("&7Damage: &c+" + damage));
-		lore.add(Color.color("&7Strength: &c+112"));
-		lore.add(Color.color("&7Crit Chance: &c+9%"));
-		lore.add(Color.color("&7Crit Damage: &c+65%"));
-		lore.add(Color.color("&r"));
-		lore.add(Color.color("&6Ability: " + ability + " &e&lRIGHT CLICK"));
-		lore.add(Color.color("&8Mana Cost: &3" + mana));
+		lore.add(Chat.color("&7Damage: &c+" + damage));
+		lore.add(Chat.color("&7Strength: &c+112"));
+		lore.add(Chat.color("&7Crit Chance: &c+9%"));
+		lore.add(Chat.color("&7Crit Damage: &c+65%"));
+		lore.add(Chat.color("&r"));
+		lore.add(Chat.color("&6Ability: " + ability + " &e&lRIGHT CLICK"));
+		lore.add(Chat.color("&8Mana Cost: &3" + mana));
 
 		itemMeta.setLore(lore);
 
 		itemStack.setItemMeta(itemMeta);
+
+		// Save everything
+		// TODO: split everything up in 2 to 3 functions
+		// TODO: a way to retrieve the data from the files (when retrieved add to Map)
+		itemData.put(uuid, this);
+
+		String path = "items/" + uuid + ".yml";
+		file = new File(CustomHealth.getInstance().getDataFolder(), path);
+		if (!file.getParentFile().exists()) {
+			file.getParentFile().mkdirs();
+		}
+
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
+
+		configuration.set("Material", material.toString());
+		configuration.set("displayName", displayName);
+		configuration.set("Rarity", rarity.toString());
+		configuration.set("Damage", damage);
+		configuration.set("Ability", ability);
+		configuration.set("Mana", mana);
+
+		try {
+			configuration.save(file);
+		} catch (Throwable throwable) {
+			throwable.printStackTrace();
+		}
+	}
+
+	public static ItemManager getItemInstance(UUID uuid) {
+		return itemData.get(uuid);
+	}
+
+	public String getDisplayName() {
+		return displayName;
 	}
 
 	public ItemStack getItem() {

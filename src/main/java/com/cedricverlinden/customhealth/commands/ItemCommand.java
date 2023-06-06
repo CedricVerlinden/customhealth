@@ -3,7 +3,7 @@ package com.cedricverlinden.customhealth.commands;
 import com.cedricverlinden.customhealth.CustomHealth;
 import com.cedricverlinden.customhealth.items.TestItem;
 import com.cedricverlinden.customhealth.managers.ItemManager;
-import com.cedricverlinden.customhealth.utils.Color;
+import com.cedricverlinden.customhealth.utils.Chat;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -14,6 +14,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.UUID;
 
 public class ItemCommand implements CommandExecutor {
 
@@ -27,11 +30,10 @@ public class ItemCommand implements CommandExecutor {
 			ItemManager test = new TestItem();
 
 			player.getInventory().addItem(test.getItem());
-			player.sendMessage(Component.text(Color.color("&7This item hits with a damage of &e" + test.getDamage())));
-			player.sendMessage(Component.text(Color.color("&7It costs &e" + test.getMana() + " &7to use it's ability")));
+			player.sendMessage(Component.text(Chat.color("&7This item hits with a damage of &e" + test.getDamage())));
+			player.sendMessage(Component.text(Chat.color("&7It costs &e" + test.getMana() + " &7to use it's ability")));
 
-			// DEBUG
-			player.sendMessage(Component.text(Color.color("&2[DEBUG] &7UUID: &a" + test.getUUID())));
+			Chat.debug(player, "&7UUID: &a" + test.getUUID());
 			return true;
 		}
 
@@ -40,20 +42,27 @@ public class ItemCommand implements CommandExecutor {
 		if ("check".equals(param)) {
 			ItemMeta currentItemMeta = player.getInventory().getItemInMainHand().getItemMeta();
 
-			PersistentDataContainer pdc = currentItemMeta.getPersistentDataContainer();
-			NamespacedKey key = new NamespacedKey(CustomHealth.getInstance(), "CustomItem");
-			if (!(pdc.getKeys().contains(key))) {
-				// DEBUG
-				player.sendMessage(Component.text(Color.color("&2[DEBUG] &cThis item is not a custom item hence it does not have a NamespacedKey")));
+			if (currentItemMeta == null) {
+				Chat.debug(player, "&cThis item doesn't have meta data");
 				return true;
 			}
 
-			// DEBUG
-			player.sendMessage(Component.text(Color.color("&2[DEBUG] &7UUID: &a" + pdc.get(key, PersistentDataType.STRING))));
+			PersistentDataContainer pdc = currentItemMeta.getPersistentDataContainer();
+			NamespacedKey key = new NamespacedKey(CustomHealth.getInstance(), "CustomItem");
+			if (!(pdc.getKeys().contains(key))) {
+				Chat.debug(player, "&cThis item is not a custom item hence it does not have a NamespacedKey");
+				return true;
+			}
 
+			UUID uuid = UUID.fromString(Objects.requireNonNull(pdc.get(key, PersistentDataType.STRING)));
+			ItemManager item = ItemManager.getItemInstance(uuid);
+
+			Chat.debug(player, "&7Current Item UUID: &a" + uuid);
+			Chat.debug(player, "&7Current Item Name: &a" + item.getDisplayName());
 			return true;
 		}
 
+		player.sendMessage(Component.text(Chat.color("&cUse: /item [check]")));
 		return true;
 	}
 }
