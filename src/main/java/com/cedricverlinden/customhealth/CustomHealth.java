@@ -2,6 +2,7 @@ package com.cedricverlinden.customhealth;
 
 import com.cedricverlinden.customhealth.commands.ItemCommand;
 import com.cedricverlinden.customhealth.listeners.EntityDamageByEntityListener;
+import com.cedricverlinden.customhealth.managers.ItemManager;
 import com.cedricverlinden.customhealth.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,10 +19,16 @@ public final class CustomHealth extends JavaPlugin {
 		loadCommands();
 		Logger.log("Loading listeners...");
 		loadListeners();
+		Logger.log("Loading items...");
+		ItemManager.registerItems();
 
 		Logger.log("Started!");
 	}
 
+	@Override
+	public void reloadConfig() {
+		ItemManager.registerItems();
+	}
 
 	@Override
 	public void onDisable() {
